@@ -1,0 +1,6 @@
+{
+  "name": "PyLibAnalytics — Python Library Book Usage Analysis System",
+  "description": "Python-powered library circulation and book usage analytics platform featuring MySQL/SQLite database management, overdue loan tracking, and Pandas, NumPy, and Matplotlib statistical reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

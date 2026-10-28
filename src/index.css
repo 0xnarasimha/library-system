@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Archivo', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --ln-volt: #D2FF00;
+    --ln-carbon: #0B0C0E;
+    --ln-surface: #14171C;
+    --ln-border: #242933;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0B0C0E;
+    color: #F4F6F8;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0.005em;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono, code, pre, .tabular-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes auraSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auraFlowDash {
+  0% {
+    stroke-dashoffset: 120;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-aura-enter {
+  animation: auraSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-aura-delay-1 {
+  animation: auraSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+}
+
+.animate-aura-delay-2 {
+  animation: auraSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.animate-aura-delay-3 {
+  animation: auraSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.animate-stream-flow {
+  stroke-dasharray: 28 92;
+  animation: auraFlowDash 1.9s linear infinite;
+}
+
+.animate-stream-flow-slow {
+  stroke-dasharray: 22 98;
+  animation: auraFlowDash 2.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aura-enter,
+  .animate-aura-delay-1,
+  .animate-aura-delay-2,
+  .animate-aura-delay-3,
+  .animate-stream-flow,
+  .animate-stream-flow-slow {
+    animation: none !important;
+  }
+}
