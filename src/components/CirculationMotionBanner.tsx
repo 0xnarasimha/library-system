@@ -50,37 +50,37 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
   return (
     <section
       aria-label="Circulation Analytics Configuration and Motion Topology"
-      className="animate-aura-enter relative overflow-hidden rounded-2xl bg-[#111419] text-[#F4F6F8] border border-[#242933] shadow-2xl"
+      className="animate-aura-enter glass-card-surface relative overflow-hidden rounded-2xl text-[#F4F6F8]"
     >
-      {/* Top Acid Volt Racing Telemetry Accent Line */}
-      <div className="inset-x-0 top-0 h-1 absolute bg-gradient-to-r from-[#D2FF00] via-[#D2FF00]/60 to-transparent" />
+      {/* Top Papaya Orange Telemetry Accent Line */}
+      <div className="inset-x-0 top-0 h-1 absolute bg-gradient-to-r from-[#FF6B00] via-[#FFA500]/70 to-transparent" />
 
-      {/* Topographic Contour Lines & Carbon Grid Backdrop (LN4 Aesthetic) */}
+      {/* Topographic Contour Lines & Papaya Orange Glow Backdrop */}
       <svg
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 w-full h-full opacity-25"
+        className="pointer-events-none absolute inset-0 w-full h-full opacity-30"
         viewBox="0 0 1200 420"
         preserveAspectRatio="none"
       >
         <defs>
-          <radialGradient id="voltGlow" cx="20%" cy="25%" r="55%">
-            <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.24" />
-            <stop offset="100%" stopColor="#D2FF00" stopOpacity="0" />
+          <radialGradient id="orangeGlow" cx="20%" cy="25%" r="55%">
+            <stop offset="0%" stopColor="#FF6B00" stopOpacity="0.26" />
+            <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
           </radialGradient>
         </defs>
-        <rect width="1200" height="420" fill="url(#voltGlow)" />
+        <rect width="1200" height="420" fill="url(#orangeGlow)" />
         <path
           d="M -100 320 C 220 140, 480 410, 820 180 C 1020 50, 1150 240, 1300 90"
           fill="none"
-          stroke="#D2FF00"
-          strokeOpacity="0.22"
+          stroke="#FF6B00"
+          strokeOpacity="0.25"
           strokeWidth="1.2"
         />
         <path
           d="M -100 370 C 260 190, 520 450, 860 220 C 1060 90, 1180 280, 1300 140"
           fill="none"
-          stroke="#D2FF00"
-          strokeOpacity="0.14"
+          stroke="#FF8C38"
+          strokeOpacity="0.16"
           strokeWidth="1"
         />
         <path
@@ -97,7 +97,7 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left 7 Cols: Title, Metadata & Quick Actions */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#D2FF00] tracking-wide">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#FF8C38] tracking-wide">
               <span>{state?.engine?.runtime || 'Python 3.10.12'}</span>
               <span aria-hidden="true" className="text-[#475569]">·</span>
               <span className="text-[#E2E8F0]">SQLite3 / MySQL Relational Engine</span>
@@ -105,13 +105,13 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
               <span className="text-[#94A3B8]">Pandas &amp; NumPy Telemetry Pipeline</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#F4F6F8] font-display leading-tight text-balance">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display leading-tight text-balance orange-title-gradient">
               Library Book Usage &amp; Circulation Telemetry
             </h1>
 
             <p className="text-sm text-[#94A3B8] max-w-2xl leading-relaxed">
               High-precision relational circulation tracking across{' '}
-              <span className="text-[#D2FF00] font-mono font-semibold">{kpis.total_books_titles ?? 10}</span>{' '}
+              <span className="text-[#FF8C38] font-mono font-semibold">{kpis.total_books_titles ?? 10}</span>{' '}
               catalog titles and{' '}
               <span className="text-[#F4F6F8] font-mono font-semibold">{kpis.total_borrowers ?? 8}</span>{' '}
               registered borrowers. Every issue, return validation, due-date window calculation, and statistical distribution executes natively in Python 3.
@@ -121,7 +121,7 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
               <button
                 type="button"
                 onClick={onNavigateToDesk}
-                className="px-4 py-2 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded-lg transition-all duration-150 hover:-translate-y-0.5 flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#FF6B00] to-[#FF8C38] hover:from-[#e56000] hover:to-[#FF6B00] rounded-lg shadow-[0_4px_20px_rgba(255,107,0,0.3)] transition-all duration-150 hover:-translate-y-0.5 flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 Issue or Return Book
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -129,9 +129,9 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
               <button
                 type="button"
                 onClick={onNavigateToPython}
-                className="px-4 py-2 text-xs font-semibold text-[#F4F6F8] bg-[#181C23] hover:bg-[#222731] border border-[#2D3440] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[#F4F6F8] bg-[#141423] hover:bg-[#1C1C30] border border-[rgba(255,140,56,0.28)] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <Layers className="w-3.5 h-3.5 text-[#D2FF00]" />
+                <Layers className="w-3.5 h-3.5 text-[#FF8C38]" />
                 Inspect Python &amp; SQL Source
               </button>
             </div>
@@ -139,10 +139,10 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
 
           {/* Right 5 Cols: Animated SVG Data-Flow & Radial Telemetry Motion Graphic */}
           <div className="lg:col-span-5">
-            <div className="rounded-xl bg-[#0B0C0E]/90 border border-[#242933] p-4 backdrop-blur-sm shadow-lg">
+            <div className="rounded-xl bg-[#0a0a14]/90 border border-[rgba(255,140,56,0.22)] p-4 backdrop-blur-md shadow-lg">
               <div className="mb-2.5 flex items-center justify-between text-[11px] font-mono text-[#8A94A6]">
                 <span>PYTHON RELATIONAL STREAM TOPOLOGY</span>
-                <span className="text-[#D2FF00] tabular-nums">REF: {settings.reference_date}</span>
+                <span className="text-[#FF8C38] tabular-nums">REF: {settings.reference_date}</span>
               </div>
 
               <svg
@@ -152,35 +152,35 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
                 aria-label="Animated Python Library Circulation Data Pipeline"
               >
                 <defs>
-                  <linearGradient id="streamVolt" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.2" />
-                    <stop offset="50%" stopColor="#D2FF00" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#D2FF00" stopOpacity="0.3" />
+                  <linearGradient id="streamOrange" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#FF6B00" stopOpacity="0.2" />
+                    <stop offset="50%" stopColor="#FF8C38" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#FFA500" stopOpacity="0.3" />
                   </linearGradient>
                   <linearGradient id="streamAlert" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.3" />
+                    <stop offset="0%" stopColor="#FF6B00" stopOpacity="0.3" />
                     <stop offset="50%" stopColor="#FF3B5C" stopOpacity="1" />
                     <stop offset="100%" stopColor="#FF3B5C" stopOpacity="0.8" />
                   </linearGradient>
                 </defs>
 
                 {/* Base Connecting Bezier Curves */}
-                <path d="M 95 34 C 135 34, 140 55, 172 55" fill="none" stroke="#1E232B" strokeWidth="2.5" />
-                <path d="M 95 78 C 135 78, 140 55, 172 55" fill="none" stroke="#1E232B" strokeWidth="2.5" />
-                <path d="M 258 55 C 292 55, 296 34, 328 34" fill="none" stroke="#1E232B" strokeWidth="2.5" />
-                <path d="M 258 55 C 292 55, 296 78, 328 78" fill="none" stroke="#1E232B" strokeWidth="2.5" />
+                <path d="M 95 34 C 135 34, 140 55, 172 55" fill="none" stroke="#1E1E32" strokeWidth="2.5" />
+                <path d="M 95 78 C 135 78, 140 55, 172 55" fill="none" stroke="#1E1E32" strokeWidth="2.5" />
+                <path d="M 258 55 C 292 55, 296 34, 328 34" fill="none" stroke="#1E1E32" strokeWidth="2.5" />
+                <path d="M 258 55 C 292 55, 296 78, 328 78" fill="none" stroke="#1E1E32" strokeWidth="2.5" />
 
                 {/* Animated Flowing Energy Pulses */}
-                <path d="M 95 34 C 135 34, 140 55, 172 55" fill="none" stroke="url(#streamVolt)" strokeWidth="2.5" className="animate-stream-flow" />
-                <path d="M 95 78 C 135 78, 140 55, 172 55" fill="none" stroke="url(#streamVolt)" strokeWidth="2.5" className="animate-stream-flow-slow" />
-                <path d="M 258 55 C 292 55, 296 34, 328 34" fill="none" stroke="url(#streamVolt)" strokeWidth="2.5" className="animate-stream-flow" />
-                <path d="M 258 55 C 292 55, 296 78, 328 78" fill="none" stroke="url(#streamAlert)" strokeWidth="2.5" className="animate-stream-flow-slow" />
+                <path d="M 95 34 C 135 34, 140 55, 172 55" fill="none" stroke="url(#streamOrange)" strokeWidth="2.5" className="animate-stream-flow" />
+                <path d="M 95 78 C 135 78, 140 55, 172 55" fill="none" stroke="url(#streamOrange)" strokeWidth="2.5" className="animate-stream-flow" />
+                <path d="M 258 55 C 292 55, 296 34, 328 34" fill="none" stroke="url(#streamOrange)" strokeWidth="2.5" className="animate-stream-flow" />
+                <path d="M 258 55 C 292 55, 296 78, 328 78" fill="none" stroke="url(#streamAlert)" strokeWidth="2.5" className="animate-stream-flow" />
 
                 {/* Travelling Data Packets along Bezier Paths */}
-                <circle r="3.2" fill="#D2FF00">
+                <circle r="3.2" fill="#FF8C38">
                   <animateMotion dur="1.9s" repeatCount="indefinite" path="M 95 34 C 135 34, 140 55, 172 55" />
                 </circle>
-                <circle r="3.2" fill="#D2FF00">
+                <circle r="3.2" fill="#FFA500">
                   <animateMotion dur="1.8s" repeatCount="indefinite" path="M 258 55 C 292 55, 296 34, 328 34" />
                 </circle>
                 <circle r="3.2" fill="#FF3B5C">
@@ -189,17 +189,17 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
 
                 {/* Left Nodes: books & borrowers */}
                 <g transform="translate(6, 14)">
-                  <rect width="89" height="38" rx="6" fill="#13161B" stroke="#282E3A" strokeWidth="1.2" />
+                  <rect width="89" height="38" rx="6" fill="#141423" stroke="rgba(255,140,56,0.25)" strokeWidth="1.2" />
                   <text x="10" y="16" fill="#8A94A6" fontFamily="JetBrains Mono, monospace" fontSize="9.5">
                     TABLE: books
                   </text>
-                  <text x="10" y="30" fill="#D2FF00" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700">
+                  <text x="10" y="30" fill="#FF8C38" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700">
                     {availCopies} avail
                   </text>
                 </g>
 
                 <g transform="translate(6, 58)">
-                  <rect width="89" height="38" rx="6" fill="#13161B" stroke="#282E3A" strokeWidth="1.2" />
+                  <rect width="89" height="38" rx="6" fill="#141423" stroke="rgba(255,140,56,0.25)" strokeWidth="1.2" />
                   <text x="10" y="16" fill="#8A94A6" fontFamily="JetBrains Mono, monospace" fontSize="9.5">
                     borrowers
                   </text>
@@ -210,11 +210,11 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
 
                 {/* Center Node: Python 3 Engine */}
                 <g transform="translate(172, 27)">
-                  <rect width="86" height="56" rx="8" fill="#13161B" stroke="#D2FF00" strokeWidth="1.6" />
-                  <text x="43" y="21" textAnchor="middle" fill="#D2FF00" fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="700">
+                  <rect width="86" height="56" rx="8" fill="#141423" stroke="#FF6B00" strokeWidth="1.6" />
+                  <text x="43" y="21" textAnchor="middle" fill="#FF8C38" fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="700">
                     PYTHON 3.10
                   </text>
-                  <text x="43" y="35" textAnchor="middle" fill="#F4F6F8" fontFamily="Plus Jakarta Sans, sans-serif" fontSize="9.5" fontWeight="600">
+                  <text x="43" y="35" textAnchor="middle" fill="#F4F6F8" fontFamily="Inter, sans-serif" fontSize="9.5" fontWeight="600">
                     Pandas · NumPy
                   </text>
                   <text x="43" y="47" textAnchor="middle" fill="#8A94A6" fontFamily="JetBrains Mono, monospace" fontSize="8.5">
@@ -224,17 +224,17 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
 
                 {/* Right Nodes: Returned & Overdue */}
                 <g transform="translate(328, 14)">
-                  <rect width="86" height="38" rx="6" fill="#13161B" stroke="#282E3A" strokeWidth="1.2" />
+                  <rect width="86" height="38" rx="6" fill="#141423" stroke="rgba(255,140,56,0.25)" strokeWidth="1.2" />
                   <text x="10" y="16" fill="#8A94A6" fontFamily="JetBrains Mono, monospace" fontSize="9.5">
                     RETURNED
                   </text>
-                  <text x="10" y="30" fill="#D2FF00" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700">
+                  <text x="10" y="30" fill="#FF8C38" fontFamily="JetBrains Mono, monospace" fontSize="11" fontWeight="700">
                     {returnedLoans} loans
                   </text>
                 </g>
 
                 <g transform="translate(328, 58)">
-                  <rect width="86" height="38" rx="6" fill="#13161B" stroke="#282E3A" strokeWidth="1.2" />
+                  <rect width="86" height="38" rx="6" fill="#141423" stroke="rgba(255,59,92,0.3)" strokeWidth="1.2" />
                   <text x="10" y="16" fill="#8A94A6" fontFamily="JetBrains Mono, monospace" fontSize="9.5">
                     OVERDUE
                   </text>
@@ -245,18 +245,18 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
               </svg>
 
               {/* 3 Radial Velocity Gauges */}
-              <div className="mt-3 pt-3 border-t border-[#222731] grid grid-cols-3 gap-2 text-center">
+              <div className="mt-3 pt-3 border-t border-[rgba(255,140,56,0.16)] grid grid-cols-3 gap-2 text-center">
                 {[
                   {
                     label: 'Shelf Stock',
                     pct: availabilityPct,
-                    color: '#D2FF00',
+                    color: '#FF6B00',
                     sub: `${availCopies}/${totalInventory} copies`,
                   },
                   {
                     label: 'Compliance',
                     pct: returnRatePct,
-                    color: '#F4F6F8',
+                    color: '#FF8C38',
                     sub: `${totalLoans - overdueLoans}/${totalLoans} loans`,
                   },
                   {
@@ -277,7 +277,7 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
                             cy="36"
                             r={radius}
                             fill="none"
-                            stroke="#1E232B"
+                            stroke="#1D1D30"
                             strokeWidth="5"
                           />
                           <circle
@@ -314,7 +314,7 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
         {/* Bottom Control Strip: Configurable Due Date & Reference Evaluation Date */}
         <form
           onSubmit={handleApplyConfig}
-          className="pt-5 border-t border-[#222731] flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+          className="pt-5 border-t border-[rgba(255,140,56,0.18)] flex flex-col sm:flex-row sm:items-end justify-between gap-4"
         >
           <div className="space-y-0.5">
             <div className="text-xs font-semibold text-[#F4F6F8]">
@@ -337,7 +337,7 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
                 max={365}
                 value={dueDaysInput}
                 onChange={(e) => setDueDaysInput(Number(e.target.value))}
-                className="w-28 px-3 py-1.5 text-sm font-mono tabular-nums bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
+                className="w-28 px-3 py-1.5 text-sm font-mono tabular-nums bg-[#08080d] text-[#F4F6F8] border border-[rgba(255,140,56,0.28)] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
               />
             </div>
 
@@ -350,14 +350,14 @@ export const CirculationMotionBanner: React.FC<CirculationMotionBannerProps> = (
                 type="date"
                 value={refDateInput}
                 onChange={(e) => setRefDateInput(e.target.value)}
-                className="px-3 py-1.5 text-sm font-mono tabular-nums bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
+                className="px-3 py-1.5 text-sm font-mono tabular-nums bg-[#08080d] text-[#F4F6F8] border border-[rgba(255,140,56,0.28)] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
               />
             </div>
 
             <button
               type="submit"
               disabled={isBusy}
-              className="px-4 py-2 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#FF6B00] to-[#FF8C38] hover:from-[#e56000] hover:to-[#FF6B00] rounded-md shadow-[0_4px_16px_rgba(255,107,0,0.25)] transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isBusy ? 'animate-spin' : ''}`} />
               Apply Due Policy

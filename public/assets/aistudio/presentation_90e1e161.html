@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyLibAnalytics — Project Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00;
+    --orange-light: #FF8C38;
+    --orange-bright: #FFA500;
+    --orange-glow: rgba(255,107,0,0.4);
+    --orange-soft: rgba(255,107,0,0.12);
+    --bg-dark: #08080d;
+    --bg-surface: rgba(18,18,28,0.65);
+    --glass-border: rgba(255,140,56,0.2);
+    --glass-bg: rgba(16,16,26,0.7);
+    --text: #F4F6F8;
+    --text-muted: #8A94A6;
+    --white: #ffffff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+  }
+
+  /* ═══════ BACKGROUND EFFECTS ═══════ */
+  .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,107,0,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(255,140,56,0.06) 0%, transparent 50%),
+                linear-gradient(180deg, #08080d 0%, #0c0c16 50%, #08080d 100%);
+  }
+
+  /* Grid overlay */
+  .bg-canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,107,0,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.5;
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .orb-1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,107,0,0.3), transparent 70%);
+    top: -100px; left: -100px;
+    animation: orbFloat1 12s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,140,56,0.25), transparent 70%);
+    bottom: -80px; right: -60px;
+    animation: orbFloat2 15s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(255,165,0,0.2), transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbFloat3 18s ease-in-out infinite;
+  }
+  .orb-4 {
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(255,107,0,0.2), transparent 70%);
+    top: 20%; right: 20%;
+    animation: orbFloat4 10s ease-in-out infinite;
+  }
+  @keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(80px, 60px) scale(1.1); }
+    66% { transform: translate(-40px, 100px) scale(0.9); }
+  }
+  @keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-60px, -80px) scale(1.15); }
+    66% { transform: translate(50px, -40px) scale(0.85); }
+  }
+  @keyframes orbFloat3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-30%, -60%) scale(1.2); }
+  }
+  @keyframes orbFloat4 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 40px); }
+  }
+
+  /* ═══════ PROGRESS BAR ═══════ */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--orange), var(--orange-bright), var(--orange));
+    z-index: 1000;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 20px var(--orange-glow);
+  }
+
+  /* ═══════ SLIDE CONTAINER ═══════ */
+  .slides-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    z-index: 10;
+    perspective: 1200px;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 80px;
+    opacity: 0;
+    visibility: hidden;
+    transform: perspective(1200px) rotateY(15deg) scale(0.85) translateX(100px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: perspective(1200px) rotateY(0) scale(1) translateX(0);
+  }
+  .slide.prev {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(-15deg) scale(0.85) translateX(-100px);
+  }
+
+  .slide-inner {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  /* ═══════ 3D GLASS CARD ═══════ */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(1deg) rotateY(-1deg);
+    box-shadow:
+      0 4px 16px rgba(0,0,0,0.3),
+      0 12px 40px rgba(0,0,0,0.2),
+      0 0 60px rgba(255,107,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  .glass-card:hover {
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-4px);
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.4),
+      0 20px 60px rgba(0,0,0,0.25),
+      0 0 80px rgba(255,107,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,107,0,0.04), transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ═══════ TYPOGRAPHY ═══════ */
+  .slide-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    background: var(--orange-soft);
+    border: 1px solid rgba(255,107,0,0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+  }
+  .slide-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--white) 0%, var(--orange-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .slide-title-sm {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--white) 0%, var(--orange-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .slide-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* ═══════ ANIMATED ELEMENTS ═══════ */
+  .anim-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide.active .anim-item { opacity: 1; transform: translateY(0); }
+  .slide.active .anim-item:nth-child(1) { transition-delay: 0.1s; }
+  .slide.active .anim-item:nth-child(2) { transition-delay: 0.2s; }
+  .slide.active .anim-item:nth-child(3) { transition-delay: 0.3s; }
+  .slide.active .anim-item:nth-child(4) { transition-delay: 0.4s; }
+  .slide.active .anim-item:nth-child(5) { transition-delay: 0.5s; }
+  .slide.active .anim-item:nth-child(6) { transition-delay: 0.6s; }
+  .slide.active .anim-item:nth-child(7) { transition-delay: 0.7s; }
+  .slide.active .anim-item:nth-child(8) { transition-delay: 0.8s; }
+
+  /* ═══════ MINI CARDS (3D) ═══════ */
+  .mini-card {
+    background: rgba(20,20,35,0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,107,0,0.15);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.35s ease;
+    transform: perspective(800px) rotateX(2deg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 30px rgba(255,107,0,0.03);
+  }
+  .mini-card:hover {
+    transform: perspective(800px) rotateX(0deg) translateY(-6px);
+    border-color: var(--orange);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 40px rgba(255,107,0,0.1);
+  }
+  .mini-card .card-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .mini-card .card-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .mini-card .card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ═══════ GRIDS ═══════ */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-2-1 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; align-items: start; }
+
+  /* ═══════ ARCHITECTURE FLOW ═══════ */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
+  .arch-node {
+    background: rgba(20,20,35,0.8);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255,107,0,0.2);
+    border-radius: 14px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 120px;
+    transform: perspective(600px) rotateY(-3deg);
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+  .arch-node:hover {
+    transform: perspective(600px) rotateY(0deg) scale(1.05);
+    border-color: var(--orange);
+    box-shadow: 0 8px 30px rgba(255,107,0,0.15);
+  }
+  .arch-node.highlight {
+    border-color: var(--orange);
+    background: linear-gradient(135deg, rgba(255,107,0,0.1), rgba(20,20,35,0.8));
+  }
+  .arch-node .icon { font-size: 24px; margin-bottom: 6px; }
+  .arch-node .label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .arch-node .name { font-size: 13px; font-weight: 700; }
+  .arch-arrow {
+    color: var(--orange);
+    font-size: 22px;
+    font-weight: 700;
+    padding: 0 4px;
+    animation: arrowPulse 2s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; text-shadow: 0 0 10px var(--orange-glow); }
+  }
+
+  /* ═══════ DB TABLE VISUAL ═══════ */
+  .db-table {
+    background: rgba(16,16,26,0.8);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255,107,0,0.2);
+    border-radius: 14px;
+    overflow: hidden;
+    transform: perspective(800px) rotateX(2deg) rotateY(-1deg);
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  }
+  .db-table:hover {
+    transform: perspective(800px) rotateX(0) rotateY(0) translateY(-4px);
+    box-shadow: 0 10px 30px rgba(255,107,0,0.1);
+  }
+  .db-table-head {
+    background: linear-gradient(135deg, var(--orange), #FF8C38);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+  }
+  .db-col {
+    padding: 7px 16px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+  }
+  .db-col:last-child { border-bottom: none; }
+  .db-col .type { color: var(--orange-light); font-size: 10px; }
+
+  /* ═══════ CODE BLOCK ═══════ */
+  .code-block {
+    background: rgba(8,8,16,0.9);
+    border: 1px solid rgba(255,107,0,0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #C9D1D9;
+  }
+  .code-block .kw { color: var(--orange); }
+  .code-block .fn { color: #60A5FA; }
+  .code-block .str { color: #22C55E; }
+  .code-block .cm { color: #4A5568; }
+
+  /* ═══════ BADGES ═══════ */
+  .badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-orange { background: rgba(255,107,0,0.15); color: var(--orange); border: 1px solid rgba(255,107,0,0.25); }
+  .badge-blue { background: rgba(96,165,250,0.12); color: #60A5FA; border: 1px solid rgba(96,165,250,0.2); }
+  .badge-green { background: rgba(34,197,94,0.12); color: #22C55E; border: 1px solid rgba(34,197,94,0.2); }
+
+  /* ═══════ MOCKUP SCREENS ═══════ */
+  .screen-mock {
+    background: rgba(12,12,20,0.9);
+    border: 1.5px solid rgba(255,107,0,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+    transform: perspective(600px) rotateX(3deg);
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .screen-mock:hover {
+    transform: perspective(600px) rotateX(0deg) translateY(-4px);
+    box-shadow: 0 12px 40px rgba(255,107,0,0.1);
+  }
+  .screen-bar {
+    background: rgba(20,20,35,0.9);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .screen-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .screen-dot.r { background: #FF5F57; }
+  .screen-dot.y { background: #FEBC2E; }
+  .screen-dot.g { background: #28C840; }
+  .screen-body {
+    padding: 16px;
+    min-height: 100px;
+  }
+  .screen-body .screen-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .screen-body .screen-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .screen-body .kpi-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .screen-body .kpi-box {
+    flex: 1;
+    background: rgba(255,107,0,0.06);
+    border: 1px solid rgba(255,107,0,0.15);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .screen-body .kpi-box .val { font-size: 18px; font-weight: 800; color: var(--orange); }
+  .screen-body .kpi-box .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
+
+  /* ═══════ BULLET LIST ═══════ */
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .bullet-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange-glow);
+  }
+
+  /* ═══════ NAVIGATION ═══════ */
+  .nav-controls {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(16,16,26,0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 10px 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,107,0,0.3);
+    background: rgba(255,107,0,0.08);
+    color: var(--orange);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+  .nav-btn:hover { background: var(--orange); color: #fff; transform: scale(1.08); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn:disabled:hover { background: rgba(255,107,0,0.08); color: var(--orange); transform: none; }
+  .nav-counter {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    min-width: 60px;
+    text-align: center;
+  }
+  .nav-counter span { color: var(--orange); }
+
+  /* ═══════ THANK YOU ANIMATIONS ═══════ */
+  @keyframes thankYouPulse {
+    0%, 100% { text-shadow: 0 0 40px rgba(255,107,0,0.3); }
+    50% { text-shadow: 0 0 80px rgba(255,107,0,0.6), 0 0 120px rgba(255,107,0,0.2); }
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .thank-you-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 72px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--orange), var(--orange-bright), #FFD700, var(--orange));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: thankYouPulse 3s ease-in-out infinite, gradientShift 4s ease infinite;
+    letter-spacing: -2px;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ═══════ COLLEGE LOGO PLACEHOLDER ═══════ */
+  .college-logo {
+    width: 80px; height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--orange), #FF8C38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255,107,0,0.3);
+    margin-bottom: 20px;
+  }
+
+  /* ═══════ API LIST ═══════ */
+  .api-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .api-method {
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .api-get { background: rgba(34,197,94,0.15); color: #22C55E; }
+  .api-post { background: rgba(255,107,0,0.15); color: var(--orange); }
+
+  /* Small screen adjustments */
+  @media (max-width: 900px) {
+    .slide { padding: 40px 24px; }
+    .glass-card { padding: 28px; }
+    .slide-title { font-size: 32px; }
+    .slide-title-sm { font-size: 26px; }
+    .grid-2, .grid-3, .grid-4, .grid-2-1 { grid-template-columns: 1fr; }
+    .arch-flow { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); }
+    .thank-you-text { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="bg-canvas"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Slides -->
+<div class="slides-wrapper" id="slidesWrapper">
+
+  <!-- ═══════ SLIDE 1: TITLE ═══════ -->
+  <div class="slide active" data-slide="0">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="anim-item">
+        <div class="college-logo" style="margin:0 auto 20px;">🎓</div>
+      </div>
+      <div class="anim-item slide-tag">Computer Science Project</div>
+      <div class="anim-item">
+        <h1 class="slide-title" style="font-size:56px;">PyLibAnalytics</h1>
+      </div>
+      <div class="anim-item">
+        <p class="slide-subtitle" style="font-size:22px; max-width:600px; margin:0 auto 28px;">
+          Library Book Usage Analysis System
+        </p>
+      </div>
+      <div class="anim-item" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:32px;">
+        <span class="badge badge-orange">Python 3</span>
+        <span class="badge badge-blue">React 19</span>
+        <span class="badge badge-green">SQLite3</span>
+        <span class="badge badge-orange">Full-Stack</span>
+      </div>
+      <div class="anim-item" style="color:var(--text-muted); font-size:16px;">
+        <p><strong style="color:var(--text)">Narasimha & Team</strong></p>
+        <p style="font-size:13px; margin-top:6px;">Python 3 Full-Stack Library Analytics Platform · 2026-2027</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 2: INTRO & PROBLEM ═══════ -->
+  <div class="slide" data-slide="1">
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="anim-item slide-tag">Introduction</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Introduction & Problem Statement</h2></div>
+        <div class="grid-2" style="margin-top:8px;">
+          <div class="anim-item">
+            <h4 style="color:var(--orange); margin-bottom:12px; font-size:15px;">📖 What is PyLibAnalytics?</h4>
+            <p style="font-size:14px; color:var(--text-muted); line-height:1.7;">
+              A comprehensive full-stack library management and analytics system that digitizes book circulation, automates overdue tracking, and provides deep insights into borrowing patterns — powered by a 1,075-line Python 3 engine with real-time React dashboard.
+            </p>
+          </div>
+          <div class="anim-item">
+            <h4 style="color:#FF3B5C; margin-bottom:12px; font-size:15px;">⚠️ The Problem</h4>
+            <ul class="bullet-list" style="font-size:13px; color:var(--text-muted);">
+              <li>Manual paper registers — error-prone, unsearchable</li>
+              <li>No automated overdue detection — books get lost</li>
+              <li>Zero analytics — no insights into borrowing patterns</li>
+              <li>Inventory desynchronization — phantom book availability</li>
+              <li>No data validation — double returns, impossible dates</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 3: OBJECTIVES & FEATURES ═══════ -->
+  <div class="slide" data-slide="2">
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="anim-item slide-tag">Goals & Features</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Objectives & Key Features</h2></div>
+        <div class="grid-2" style="margin-top:8px;">
+          <div class="anim-item">
+            <h4 style="color:var(--orange); margin-bottom:14px; font-size:15px;">🎯 Main Objectives</h4>
+            <ul class="bullet-list" style="font-size:13px; color:var(--text-muted);">
+              <li>Digitize all library circulation operations</li>
+              <li>Automate overdue detection with configurable policies</li>
+              <li>Generate comprehensive analytics and reports</li>
+              <li>Provide SQL Studio for custom queries</li>
+              <li>Ensure data integrity with atomic transactions</li>
+              <li>Visualize data with Python-generated SVG charts</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="anim-item" style="color:var(--orange); margin-bottom:14px; font-size:15px;">⚡ Key Features</h4>
+            <div class="grid-2" style="gap:10px;">
+              <div class="anim-item mini-card">
+                <span class="card-icon">📚</span>
+                <div class="card-title">Issue & Return</div>
+                <div class="card-desc">Loan management with copy tracking</div>
+              </div>
+              <div class="anim-item mini-card">
+                <span class="card-icon">📊</span>
+                <div class="card-title">Dashboard</div>
+                <div class="card-desc">7+ KPIs with real-time stats</div>
+              </div>
+              <div class="anim-item mini-card">
+                <span class="card-icon">📈</span>
+                <div class="card-title">SVG Charts</div>
+                <div class="card-desc">Python-generated visualizations</div>
+              </div>
+              <div class="anim-item mini-card">
+                <span class="card-icon">🔍</span>
+                <div class="card-title">SQL Studio</div>
+                <div class="card-desc">Direct database querying</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 4: TECH STACK ═══════ -->
+  <div class="slide" data-slide="3">
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="anim-item slide-tag">Technology</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Technology Stack</h2></div>
+        <div class="grid-3" style="margin-top:12px;">
+          <div>
+            <h4 class="anim-item" style="color:var(--orange); margin-bottom:12px; font-size:14px;">🖥️ Frontend</h4>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">⚛️ React 19</div>
+              <div class="card-desc">Component-based SPA</div>
+            </div>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">📘 TypeScript 7</div>
+              <div class="card-desc">Type-safe development</div>
+            </div>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">⚡ Vite 8</div>
+              <div class="card-desc">Build tool with HMR</div>
+            </div>
+            <div class="anim-item mini-card">
+              <div class="card-title">🎨 TailwindCSS 4</div>
+              <div class="card-desc">Utility-first CSS</div>
+            </div>
+          </div>
+          <div>
+            <h4 class="anim-item" style="color:var(--orange); margin-bottom:12px; font-size:14px;">🐍 Backend</h4>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">🐍 Python 3</div>
+              <div class="card-desc">1,075 lines of core logic</div>
+            </div>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">🚂 Express.js 4</div>
+              <div class="card-desc">HTTP server middleware</div>
+            </div>
+            <div class="anim-item mini-card">
+              <div class="card-title">🗄️ SQLite3</div>
+              <div class="card-desc">Embedded RDBMS</div>
+            </div>
+          </div>
+          <div>
+            <h4 class="anim-item" style="color:var(--orange); margin-bottom:12px; font-size:14px;">📊 Libraries</h4>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">📊 NumPy</div>
+              <div class="card-desc">Statistical analysis</div>
+            </div>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">🐼 Pandas</div>
+              <div class="card-desc">Data analysis</div>
+            </div>
+            <div class="anim-item mini-card" style="margin-bottom:10px;">
+              <div class="card-title">📈 Matplotlib</div>
+              <div class="card-desc">SVG chart generation</div>
+            </div>
+            <div class="anim-item mini-card">
+              <div class="card-title">🎭 Motion</div>
+              <div class="card-desc">UI animations</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 5: ARCHITECTURE ═══════ -->
+  <div class="slide" data-slide="4">
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="anim-item slide-tag">Architecture</div>
+        <div class="anim-item"><h2 class="slide-title-sm">System Architecture</h2></div>
+        <div class="anim-item arch-flow">
+          <div class="arch-node">
+            <div class="icon">🌐</div>
+            <div class="label">Client</div>
+            <div class="name">Browser</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node highlight">
+            <div class="icon">⚛️</div>
+            <div class="label">Frontend</div>
+            <div class="name">React 19 UI</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node highlight">
+            <div class="icon">🚂</div>
+            <div class="label">Middleware</div>
+            <div class="name">Express.js</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node highlight">
+            <div class="icon">🐍</div>
+            <div class="label">Engine</div>
+            <div class="name">Python 3</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node">
+            <div class="icon">🗄️</div>
+            <div class="label">Database</div>
+            <div class="name">SQLite3</div>
+          </div>
+        </div>
+        <div class="anim-item" style="margin-top:20px;">
+          <div class="code-block">
+<span class="cm">// Server bridges Python engine via child process</span>
+<span class="kw">const</span> child = <span class="fn">execFile</span>(<span class="str">'python3'</span>, [enginePath, action]);
+child.stdin.<span class="fn">write</span>(<span class="fn">JSON.stringify</span>(payload));  <span class="cm">// Send JSON via stdin</span>
+<span class="kw">const</span> result = <span class="fn">JSON.parse</span>(stdout);             <span class="cm">// Receive JSON via stdout</span>
+          </div>
+        </div>
+        <div class="anim-item" style="margin-top:16px;">
+          <p style="font-size:13px; color:var(--text-muted); text-align:center;">
+            Three-tier architecture: React SPA → Express REST API (10 endpoints) → Python Engine → SQLite3 DB
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 6: DATABASE & APIs ═══════ -->
+  <div class="slide" data-slide="5">
+    <div class="slide-inner">
+      <div class="glass-card" style="padding:36px;">
+        <div class="anim-item slide-tag">Data Layer</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Database Design & APIs</h2></div>
+        <div class="grid-2-1" style="margin-top:12px;">
+          <div>
+            <div class="grid-3" style="gap:12px;">
+              <div class="anim-item db-table">
+                <div class="db-table-head">📚 books</div>
+                <div class="db-col"><span>🔑 book_id</span> <span class="type">INT PK</span></div>
+                <div class="db-col"><span>isbn</span> <span class="type">TEXT UQ</span></div>
+                <div class="db-col"><span>title</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>author</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>category</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>copies</span> <span class="type">INT</span></div>
+              </div>
+              <div class="anim-item db-table">
+                <div class="db-table-head">👥 borrowers</div>
+                <div class="db-col"><span>🔑 borrower_id</span> <span class="type">INT PK</span></div>
+                <div class="db-col"><span>name</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>roll_no</span> <span class="type">TEXT UQ</span></div>
+              </div>
+              <div class="anim-item db-table">
+                <div class="db-table-head">📋 loans</div>
+                <div class="db-col"><span>🔑 loan_id</span> <span class="type">INT PK</span></div>
+                <div class="db-col"><span>🔗 book_id</span> <span class="type">FK</span></div>
+                <div class="db-col"><span>🔗 borrower_id</span> <span class="type">FK</span></div>
+                <div class="db-col"><span>issue_date</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>due_date</span> <span class="type">TEXT</span></div>
+                <div class="db-col"><span>return_date</span> <span class="type">TEXT?</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="anim-item">
+            <h4 style="color:var(--orange); margin-bottom:12px; font-size:13px;">📡 REST API Endpoints</h4>
+            <div style="font-size:12px;">
+              <div class="api-item"><span class="api-method api-get">GET</span> /api/state</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/loans/issue</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/loans/return</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/books</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/borrowers</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/settings</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/sql</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/python/cli-report</div>
+              <div class="api-item"><span class="api-method api-post">POST</span> /api/reset</div>
+              <div class="api-item"><span class="api-method api-get">GET</span> /api/python/files</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 7: IMPLEMENTATION ═══════ -->
+  <div class="slide" data-slide="6">
+    <div class="slide-inner">
+      <div class="glass-card" style="padding:36px;">
+        <div class="anim-item slide-tag">Implementation</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Implementation & Screenshots</h2></div>
+        <div class="grid-2" style="gap:16px; margin-top:12px;">
+          <div class="anim-item screen-mock">
+            <div class="screen-bar">
+              <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+              <span style="font-size:11px; color:var(--text-muted); margin-left:8px;">Analytics Dashboard</span>
+            </div>
+            <div class="screen-body">
+              <div class="screen-title">📊 Analytics & Reports</div>
+              <div class="screen-desc">Real-time KPI dashboard with SVG charts</div>
+              <div class="kpi-row">
+                <div class="kpi-box"><div class="val">10</div><div class="lbl">Books</div></div>
+                <div class="kpi-box"><div class="val">26</div><div class="lbl">Loans</div></div>
+                <div class="kpi-box"><div class="val">4</div><div class="lbl">Overdue</div></div>
+                <div class="kpi-box"><div class="val">8</div><div class="lbl">Members</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="anim-item screen-mock">
+            <div class="screen-bar">
+              <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+              <span style="font-size:11px; color:var(--text-muted); margin-left:8px;">Circulation Desk</span>
+            </div>
+            <div class="screen-body">
+              <div class="screen-title">📚 Circulation Desk</div>
+              <div class="screen-desc">Issue & return books with validation, due date management, and copy tracking. Atomic transactions ensure consistency.</div>
+            </div>
+          </div>
+          <div class="anim-item screen-mock">
+            <div class="screen-bar">
+              <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+              <span style="font-size:11px; color:var(--text-muted); margin-left:8px;">Catalog & Borrowers</span>
+            </div>
+            <div class="screen-body">
+              <div class="screen-title">📖 Catalog & Borrowers</div>
+              <div class="screen-desc">Add and manage books (ISBN, title, author, category, copies) and register borrowers (name, roll number).</div>
+            </div>
+          </div>
+          <div class="anim-item screen-mock">
+            <div class="screen-bar">
+              <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+              <span style="font-size:11px; color:var(--text-muted); margin-left:8px;">Python & SQL Studio</span>
+            </div>
+            <div class="screen-body">
+              <div class="screen-title">🐍 Python & SQL Studio</div>
+              <div class="screen-desc">Execute SQL queries, run Python CLI reports, view source code, and download analysis reports.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 8: CONCLUSION ═══════ -->
+  <div class="slide" data-slide="7">
+    <div class="slide-inner">
+      <div class="glass-card">
+        <div class="anim-item slide-tag">Conclusion</div>
+        <div class="anim-item"><h2 class="slide-title-sm">Conclusion & Future Scope</h2></div>
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="anim-item">
+            <h4 style="color:var(--orange); margin-bottom:14px; font-size:15px;">✅ Conclusion</h4>
+            <p style="font-size:14px; color:var(--text-muted); line-height:1.8;">
+              Successfully built a full-stack library analytics system with a Python 3 backend engine, React 19 frontend, and real-time analytics. The system handles complete circulation lifecycle with atomic transactions, automated overdue detection, and comprehensive reporting.
+            </p>
+            <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="badge badge-green">1,075 Lines Python</span>
+              <span class="badge badge-blue">10 API Endpoints</span>
+              <span class="badge badge-orange">All Tests Passing</span>
+            </div>
+          </div>
+          <div class="anim-item">
+            <h4 style="color:var(--orange); margin-bottom:14px; font-size:15px;">🔮 Future Scope</h4>
+            <ul class="bullet-list" style="font-size:13px; color:var(--text-muted);">
+              <li><strong>Mobile App</strong> — Progressive Web App for mobile access</li>
+              <li><strong>Barcode Scanning</strong> — QR/barcode for rapid issue/return</li>
+              <li><strong>Email Notifications</strong> — Automated overdue reminders</li>
+              <li><strong>AI Recommendations</strong> — ML-powered book suggestions</li>
+              <li><strong>Production DB</strong> — MySQL/PostgreSQL migration</li>
+              <li><strong>Fine Tracking</strong> — Automated fine calculation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SLIDE 9: THANK YOU ═══════ -->
+  <div class="slide" data-slide="8">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="anim-item">
+        <div class="thank-you-text">Thank You!</div>
+      </div>
+      <div class="anim-item" style="margin-top:24px;">
+        <p style="font-size:20px; color:var(--text-muted); margin-bottom:8px;">
+          PyLibAnalytics — Library Book Usage Analysis System
+        </p>
+      </div>
+      <div class="anim-item" style="margin-top:12px;">
+        <p style="font-size:16px; color:var(--text);">
+          <strong>Narasimha & Team</strong>
+        </p>
+        <p style="font-size:13px; color:var(--text-muted); margin-top:6px;">
+          Python 3 · React 19 · SQLite3 · NumPy · Express.js
+        </p>
+      </div>
+      <div class="anim-item" style="margin-top:32px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <span class="badge badge-orange" style="font-size:13px; padding:8px 20px;">🐍 Python Powered</span>
+        <span class="badge badge-blue" style="font-size:13px; padding:8px 20px;">⚛️ React Frontend</span>
+        <span class="badge badge-green" style="font-size:13px; padding:8px 20px;">✅ Fully Tested</span>
+      </div>
+      <div class="anim-item" style="margin-top:40px;">
+        <p style="font-size:14px; color:var(--text-muted);">
+          Questions? Let's discuss! 🙋
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation Controls -->
+<div class="nav-controls">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>‹</button>
+  <div class="nav-counter"><span id="currentSlide">1</span> / <span id="totalSlides">9</span></div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">›</button>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  const progressBar = document.getElementById('progressBar');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const currentSlideEl = document.getElementById('currentSlide');
+
+  function updateSlide() {
+    slides.forEach((slide, i) => {
+      slide.classList.remove('active', 'prev');
+      if (i === currentSlide) slide.classList.add('active');
+      else if (i < currentSlide) slide.classList.add('prev');
+    });
+
+    progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+    currentSlideEl.textContent = currentSlide + 1;
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === totalSlides - 1;
+  }
+
+  function changeSlide(direction) {
+    const next = currentSlide + direction;
+    if (next >= 0 && next < totalSlides) {
+      currentSlide = next;
+      updateSlide();
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      changeSlide(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      changeSlide(-1);
+    }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+  });
+
+  // Initialize
+  updateSlide();
+</script>
+</body>
+</html>

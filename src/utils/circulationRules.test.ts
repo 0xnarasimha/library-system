@@ -7,6 +7,8 @@ import {
   validateReturnTransaction,
   applyIssueLocally,
   applyReturnLocally,
+  buildSmoothSplinePaths,
+  computeDonutSegments,
   type BookRecord,
   type BorrowerRecord,
   type LoanRecord,
@@ -157,4 +159,25 @@ test('available-copy counts remain consistent across issue and return lifecycle'
   assert.equal(afterReturn.books[0].copies_available, 2);
   assert.equal(afterReturn.loans[0].status, 'RETURNED');
   assert.equal(afterReturn.loans[0].return_date, '2026-10-22');
+});
+
+test('buildSmoothSplinePaths and computeDonutSegments generate valid SVG paths and segments', () => {
+  const spline = buildSmoothSplinePaths(
+    [
+      { x: 40, y: 150 },
+      { x: 200, y: 90 },
+      { x: 400, y: 60 },
+    ],
+    190
+  );
+  assert.ok(spline.linePath.startsWith('M 40.0,150.0 C'));
+  assert.ok(spline.areaPath.endsWith('Z'));
+
+  const segments = computeDonutSegments([
+    { category: 'Data Science', total_loans: 10, share_pct: 50 },
+    { category: 'Algorithms', total_loans: 10, share_pct: 50 },
+  ]);
+  assert.equal(segments.length, 2);
+  assert.equal(segments[0].dashOffset, 0);
+  assert.ok(segments[1].dashOffset < 0);
 });

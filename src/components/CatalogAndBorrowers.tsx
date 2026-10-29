@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import type { BookRecord, BorrowerRecord } from '../utils/circulationRules';
-import { AlertCircle, CheckCircle2, Search } from 'lucide-react';
+import type { AppRoutePath } from '../App';
+
+export type CatalogSubRoute = 'books' | 'borrowers';
 
 interface CatalogAndBorrowersProps {
+  subRoute: CatalogSubRoute;
+  onNavigateRoute: (path: AppRoutePath) => void;
   books: BookRecord[];
   borrowers: BorrowerRecord[];
   onAddBook: (payload: {
@@ -20,6 +24,7 @@ interface CatalogAndBorrowersProps {
 }
 
 export const CatalogAndBorrowers: React.FC<CatalogAndBorrowersProps> = ({
+  subRoute,
   books,
   borrowers,
   onAddBook,
@@ -44,6 +49,7 @@ export const CatalogAndBorrowers: React.FC<CatalogAndBorrowersProps> = ({
   // Filter
   const [bookSearch, setBookSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [borrowerSearch, setBorrowerSearch] = useState('');
 
   const categories = Array.from(new Set(books.map((b) => b.category))).sort();
 
@@ -126,213 +132,306 @@ export const CatalogAndBorrowers: React.FC<CatalogAndBorrowersProps> = ({
     return true;
   });
 
-  return (
-    <div className="space-y-8">
-      {/* Top Split: Add Book Record + Add Borrower Record */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        {/* Form 1: Add Book Record */}
+  const filteredBorrowers = borrowers.filter((br) => {
+    if (!borrowerSearch.trim()) return true;
+    const q = borrowerSearch.toLowerCase();
+    return (
+      br.borrower_name.toLowerCase().includes(q) ||
+      br.roll_no.toLowerCase().includes(q)
+    );
+  });
+
+  if (subRoute === 'borrowers') {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left 4 Cols: Add Borrower Record */}
         <section
-          aria-label="Add Book Record"
-          className="bg-[#13161B] border border-[#242933] rounded-xl p-6 flex flex-col justify-between"
+          aria-label="Add Borrower Record"
+          className="lg:col-span-4 apple-glass glass-edge-sweep p-6 sm:p-7"
         >
-          <div>
-            <div className="text-xs font-mono text-[#D2FF00]">
-              books(book_id, isbn, title, author, category, copies_available)
-            </div>
-            <h2 className="mt-1 text-lg font-bold text-[#F4F6F8]">
-              Add Book to Library Catalog
-            </h2>
-            <form onSubmit={handleCreateBook} className="mt-4 space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="book-isbn-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                    ISBN-13
-                  </label>
-                  <input
-                    id="book-isbn-input"
-                    type="text"
-                    placeholder="978-0134093413"
-                    value={isbn}
-                    onChange={(e) => setIsbn(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm font-mono bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="book-category-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                    Subject Category
-                  </label>
-                  <input
-                    id="book-category-input"
-                    type="text"
-                    placeholder="Data Science"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                  />
-                </div>
-              </div>
+          <div className="text-xs font-mono text-[#ffd085]">
+            borrowers(borrower_id, borrower_name, roll_no)
+          </div>
+          <h2 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
+            Register Student / Faculty Borrower
+          </h2>
+          <p className="text-xs text-[#b5b8ad] mt-1">
+            Adds a borrower entity with unique university roll number for circulation tracking.
+          </p>
 
-              <div>
-                <label htmlFor="book-title-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                  Book Title
-                </label>
-                <input
-                  id="book-title-input"
-                  type="text"
-                  placeholder="Designing Data-Intensive Applications"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-1.5 text-sm bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label htmlFor="book-author-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                    Author Name
-                  </label>
-                  <input
-                    id="book-author-input"
-                    type="text"
-                    placeholder="Martin Kleppmann"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="book-copies-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                    Copies Available
-                  </label>
-                  <input
-                    id="book-copies-input"
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={copiesAvailable}
-                    onChange={(e) => setCopiesAvailable(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 text-sm font-mono tabular-nums bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                  />
-                </div>
-              </div>
-
-              {bookMsg && (
-                <div
-                  role="alert"
-                  className={`p-2.5 rounded-md border text-xs flex items-center gap-2 ${
-                    bookMsg.type === 'error'
-                      ? 'bg-[#2A1218] border-[#FF3B5C]/40 text-[#FF6B84]'
-                      : 'bg-[#172308] border-[#D2FF00]/40 text-[#D2FF00]'
-                  }`}
-                >
-                  {bookMsg.type === 'error' ? (
-                    <AlertCircle className="w-4 h-4 text-[#FF3B5C] shrink-0" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4 text-[#D2FF00] shrink-0" />
-                  )}
-                  <span>{bookMsg.text}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isBusy}
-                className="w-full py-2 px-4 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded-md transition-colors cursor-pointer disabled:opacity-50"
+          <form onSubmit={handleCreateBorrower} className="mt-5 space-y-4">
+            <div>
+              <label
+                htmlFor="borrower-name-input"
+                className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
               >
-                Save Book Record
-              </button>
-            </form>
+                Full Name
+              </label>
+              <input
+                id="borrower-name-input"
+                type="text"
+                placeholder="Neha Kulkarni"
+                value={borrowerName}
+                onChange={(e) => setBorrowerName(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="borrower-roll-input"
+                className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+              >
+                University Roll Number (Unique)
+              </label>
+              <input
+                id="borrower-roll-input"
+                type="text"
+                placeholder="CS2024-089"
+                value={rollNo}
+                onChange={(e) => setRollNo(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm font-mono bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+              />
+            </div>
+
+            {borrowerMsg && (
+              <div
+                role="alert"
+                className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2 ${
+                  borrowerMsg.type === 'error'
+                    ? 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                    : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">
+                  {borrowerMsg.type === 'error' ? 'warning' : 'check_circle'}
+                </span>
+                <span>{borrowerMsg.text}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isBusy}
+              className="w-full py-3 px-4 rounded-xl bg-[#ffd085] hover:bg-[#ffe0a3] text-[#191c19] font-mono text-xs font-bold shadow-[0_8px_24px_rgba(255,208,133,0.28)] transition-all cursor-pointer disabled:opacity-50"
+            >
+              Register Borrower
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-[#b5b8ad] font-mono">
+            <span>Total Borrowers: {borrowers.length}</span>
+            <span className="text-emerald-400">Unique Roll No</span>
           </div>
         </section>
 
-        {/* Form 2: Add Borrower Record */}
+        {/* Right 8 Cols: Borrowers Directory Table */}
         <section
-          aria-label="Add Borrower Record"
-          className="bg-[#13161B] border border-[#242933] rounded-xl p-6 flex flex-col justify-between"
+          aria-label="Borrowers Directory Table"
+          className="lg:col-span-8 apple-glass-table p-6 sm:p-8 space-y-5"
         >
-          <div>
-            <div className="text-xs font-mono text-[#D2FF00]">
-              borrowers(borrower_id, borrower_name, roll_no)
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/10">
+            <div>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#fbf8ee]">
+                Registered Borrowers Table ({filteredBorrowers.length} records)
+              </h2>
+              <p className="text-xs text-[#b5b8ad] font-mono">
+                SELECT borrower_id, borrower_name, roll_no FROM borrowers
+              </p>
             </div>
-            <h2 className="mt-1 text-lg font-bold text-[#F4F6F8]">
-              Register Student / Faculty Borrower
-            </h2>
-            <p className="text-xs text-[#8A94A6] mt-1">
-              Adds a borrower entity with unique university roll number for circulation tracking.
-            </p>
-
-            <form onSubmit={handleCreateBorrower} className="mt-5 space-y-4">
-              <div>
-                <label htmlFor="borrower-name-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                  Full Name
-                </label>
-                <input
-                  id="borrower-name-input"
-                  type="text"
-                  placeholder="Neha Kulkarni"
-                  value={borrowerName}
-                  onChange={(e) => setBorrowerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="borrower-roll-input" className="block text-xs font-semibold text-[#94A3B8] mb-1">
-                  University Roll Number (Unique)
-                </label>
-                <input
-                  id="borrower-roll-input"
-                  type="text"
-                  placeholder="CS2024-089"
-                  value={rollNo}
-                  onChange={(e) => setRollNo(e.target.value)}
-                  className="w-full px-3 py-2 text-sm font-mono bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
-                />
-              </div>
-
-              {borrowerMsg && (
-                <div
-                  role="alert"
-                  className={`p-2.5 rounded-md border text-xs flex items-center gap-2 ${
-                    borrowerMsg.type === 'error'
-                      ? 'bg-[#2A1218] border-[#FF3B5C]/40 text-[#FF6B84]'
-                      : 'bg-[#172308] border-[#D2FF00]/40 text-[#D2FF00]'
-                  }`}
-                >
-                  {borrowerMsg.type === 'error' ? (
-                    <AlertCircle className="w-4 h-4 text-[#FF3B5C] shrink-0" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4 text-[#D2FF00] shrink-0" />
-                  )}
-                  <span>{borrowerMsg.text}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isBusy}
-                className="w-full py-2.5 px-4 text-xs font-bold text-[#0B0C0E] bg-[#F4F6F8] hover:bg-white rounded-md transition-colors cursor-pointer disabled:opacity-50"
-              >
-                Register Borrower
-              </button>
-            </form>
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-[#b5b8ad] font-mono text-xs">&gt;_</span>
+              <input
+                type="search"
+                aria-label="Search borrowers"
+                placeholder="Search name or roll no..."
+                value={borrowerSearch}
+                onChange={(e) => setBorrowerSearch(e.target.value)}
+                className="pl-8 pr-4 py-1.5 rounded-xl bg-white/05 border border-white/15 text-[#fbf8ee] font-mono text-xs placeholder-[#b5b8ad]/60 focus:outline-none focus:ring-2 focus:ring-[#ffd085]/50"
+              />
+            </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-[#222731] flex items-center justify-between text-xs text-[#8A94A6] font-mono">
-            <span>Total Registered Borrowers: {borrowers.length}</span>
-            <span>Unique Roll Numbers Enforced</span>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead>
+                <tr className="text-[#b5b8ad] uppercase tracking-wider border-b border-white/10 font-semibold text-[11px]">
+                  <th className="py-3 px-4">Borrower ID</th>
+                  <th className="py-3 px-4">Borrower Name</th>
+                  <th className="py-3 px-4">Roll No</th>
+                  <th className="py-3 px-4 text-right">Total Borrowed</th>
+                  <th className="py-3 px-4 text-right">Active Loans</th>
+                  <th className="py-3 px-4 text-right">Overdue Loans</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/05">
+                {filteredBorrowers.map((br) => (
+                  <tr key={br.borrower_id} className="hover:bg-white/05 transition-colors">
+                    <td className="py-3.5 px-4 text-[#ffd085] font-semibold">#{br.borrower_id}</td>
+                    <td className="py-3.5 px-4 font-sans font-medium text-[#fbf8ee] text-sm">
+                      {br.borrower_name}
+                    </td>
+                    <td className="py-3.5 px-4 text-sky-300">{br.roll_no}</td>
+                    <td className="py-3.5 px-4 text-right text-[#fbf8ee] font-bold">
+                      {br.total_borrowed ?? 0}
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-emerald-400 font-semibold">
+                      {br.active_loans ?? 0}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <span className={br.overdue_loans ? 'text-rose-400 font-bold' : 'text-white/30'}>
+                        {br.overdue_loans ?? 0}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
       </div>
+    );
+  }
 
-      {/* Books Catalog Table */}
-      <section aria-label="Books Catalog Table" className="bg-[#13161B] border border-[#242933] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#222731] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  // Default SubRoute: 'books' ('/catalog')
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Left 4 Cols: Add Book Record */}
+      <section
+        aria-label="Add Book Record"
+        className="lg:col-span-4 apple-glass glass-edge-sweep p-6 sm:p-7"
+      >
+        <div className="text-xs font-mono text-[#ffd085]">
+          books(book_id, isbn, title, author, category, copies_available)
+        </div>
+        <h2 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
+          Add Book to Library Catalog
+        </h2>
+        <form onSubmit={handleCreateBook} className="mt-5 space-y-4">
           <div>
-            <h2 className="text-base font-bold text-[#F4F6F8]">
+            <label
+              htmlFor="book-isbn-input"
+              className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+            >
+              ISBN-13
+            </label>
+            <input
+              id="book-isbn-input"
+              type="text"
+              placeholder="978-0134093413"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+              className="w-full px-3.5 py-2 text-sm font-mono bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="book-title-input"
+              className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+            >
+              Book Title
+            </label>
+            <input
+              id="book-title-input"
+              type="text"
+              placeholder="Designing Data-Intensive Applications"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3.5 py-2 text-sm bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="book-author-input"
+              className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+            >
+              Author Name
+            </label>
+            <input
+              id="book-author-input"
+              type="text"
+              placeholder="Martin Kleppmann"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              className="w-full px-3.5 py-2 text-sm bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="book-category-input"
+                className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+              >
+                Subject Category
+              </label>
+              <input
+                id="book-category-input"
+                type="text"
+                placeholder="Data Science"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="book-copies-input"
+                className="block text-xs font-mono uppercase tracking-wider text-[#d8dad0] mb-1.5"
+              >
+                Copies Available
+              </label>
+              <input
+                id="book-copies-input"
+                type="number"
+                min={0}
+                max={100}
+                value={copiesAvailable}
+                onChange={(e) => setCopiesAvailable(Number(e.target.value))}
+                className="w-full px-3.5 py-2 text-sm font-mono bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
+              />
+            </div>
+          </div>
+
+          {bookMsg && (
+            <div
+              role="alert"
+              className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2 ${
+                bookMsg.type === 'error'
+                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                  : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {bookMsg.type === 'error' ? 'warning' : 'check_circle'}
+              </span>
+              <span>{bookMsg.text}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isBusy}
+            className="w-full py-3 px-4 rounded-xl bg-[#ffd085] hover:bg-[#ffe0a3] text-[#191c19] font-mono text-xs font-bold shadow-[0_8px_24px_rgba(255,208,133,0.28)] transition-all cursor-pointer disabled:opacity-50"
+          >
+            Save Book Record
+          </button>
+        </form>
+      </section>
+
+      {/* Right 8 Cols: Books Catalog Table */}
+      <section
+        aria-label="Books Catalog Table"
+        className="lg:col-span-8 apple-glass-table p-6 sm:p-8 space-y-5"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#fbf8ee]">
               Books Inventory Table ({filteredBooks.length} titles)
             </h2>
-            <p className="text-xs text-[#8A94A6] font-mono">
+            <p className="text-xs text-[#b5b8ad] font-mono">
               SELECT book_id, isbn, title, author, category, copies_available FROM books
             </p>
           </div>
@@ -342,7 +441,7 @@ export const CatalogAndBorrowers: React.FC<CatalogAndBorrowersProps> = ({
               aria-label="Filter by book category"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
+              className="px-3.5 py-1.5 text-xs font-mono bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/50"
             >
               <option value="ALL">All Categories</option>
               {categories.map((c) => (
@@ -352,104 +451,50 @@ export const CatalogAndBorrowers: React.FC<CatalogAndBorrowersProps> = ({
               ))}
             </select>
 
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-[#8A94A6] absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-[#b5b8ad] font-mono text-xs">&gt;_</span>
               <input
                 type="search"
                 aria-label="Search books catalog"
                 placeholder="Search ISBN, title, author..."
                 value={bookSearch}
                 onChange={(e) => setBookSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
+                className="pl-8 pr-4 py-1.5 rounded-xl bg-white/05 border border-white/15 text-[#fbf8ee] font-mono text-xs placeholder-[#b5b8ad]/60 focus:outline-none focus:ring-2 focus:ring-[#ffd085]/50"
               />
             </div>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#222731] bg-[#0E1116] text-xs font-semibold text-[#8A94A6]">
-                <th className="py-2.5 px-4 whitespace-nowrap">ID</th>
-                <th className="py-2.5 px-4 whitespace-nowrap">ISBN</th>
-                <th className="py-2.5 px-4">Title &amp; Author</th>
-                <th className="py-2.5 px-4">Category</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Total Loans</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Active Out</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Copies Available</th>
+              <tr className="text-[#b5b8ad] uppercase tracking-wider border-b border-white/10 font-semibold text-[11px]">
+                <th className="py-3 px-4">ID</th>
+                <th className="py-3 px-4">ISBN</th>
+                <th className="py-3 px-4">Title &amp; Author</th>
+                <th className="py-3 px-4">Category</th>
+                <th className="py-3 px-4 text-right">Total Loans</th>
+                <th className="py-3 px-4 text-right">Active Out</th>
+                <th className="py-3 px-4 text-right">Copies Available</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#222731] text-sm">
+            <tbody className="divide-y divide-white/05">
               {filteredBooks.map((b) => (
-                <tr key={b.book_id} className="hover:bg-[#191D24]">
-                  <td className="py-2.5 px-4 font-mono text-xs text-[#94A3B8] tabular-nums whitespace-nowrap">
-                    #{b.book_id}
+                <tr key={b.book_id} className="hover:bg-white/05 transition-colors">
+                  <td className="py-3.5 px-4 text-[#ffd085] font-semibold">#{b.book_id}</td>
+                  <td className="py-3.5 px-4 text-[#d8dad0]">{b.isbn}</td>
+                  <td className="py-3.5 px-4">
+                    <div className="font-sans font-semibold text-[#fbf8ee] text-sm">{b.title}</div>
+                    <div className="text-[11px] text-[#b5b8ad]">{b.author}</div>
                   </td>
-                  <td className="py-2.5 px-4 font-mono text-xs text-[#94A3B8] tabular-nums whitespace-nowrap">
-                    {b.isbn}
-                  </td>
-                  <td className="py-2.5 px-4">
-                    <div className="font-medium text-[#F4F6F8]">{b.title}</div>
-                    <div className="text-xs text-[#8A94A6]">{b.author}</div>
-                  </td>
-                  <td className="py-2.5 px-4 text-xs text-[#94A3B8]">{b.category}</td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs font-semibold text-[#F4F6F8] tabular-nums whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-sky-300">{b.category}</td>
+                  <td className="py-3.5 px-4 text-right text-emerald-400 font-bold">
                     {b.total_loans ?? 0}
                   </td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs text-[#94A3B8] tabular-nums whitespace-nowrap">
-                    {b.active_loans ?? 0}
-                  </td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs font-semibold tabular-nums whitespace-nowrap">
-                    <span className={b.copies_available === 0 ? 'text-amber-400' : 'text-[#D2FF00]'}>
+                  <td className="py-3.5 px-4 text-right text-[#d8dad0]">{b.active_loans ?? 0}</td>
+                  <td className="py-3.5 px-4 text-right font-bold">
+                    <span className={b.copies_available === 0 ? 'text-rose-400' : 'text-[#ffd085]'}>
                       {b.copies_available}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Borrowers Directory Table */}
-      <section aria-label="Borrowers Directory Table" className="bg-[#13161B] border border-[#242933] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#222731]">
-          <h2 className="text-base font-bold text-[#F4F6F8]">
-            Registered Borrowers Table ({borrowers.length} records)
-          </h2>
-          <p className="text-xs text-[#8A94A6] font-mono">
-            SELECT borrower_id, borrower_name, roll_no FROM borrowers
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#222731] bg-[#0E1116] text-xs font-semibold text-[#8A94A6]">
-                <th className="py-2.5 px-4 whitespace-nowrap">Borrower ID</th>
-                <th className="py-2.5 px-4">Borrower Name</th>
-                <th className="py-2.5 px-4 whitespace-nowrap">Roll No</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Total Borrowed</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Active Loans</th>
-                <th className="py-2.5 px-4 text-right whitespace-nowrap">Overdue Loans</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#222731] text-sm">
-              {borrowers.map((br) => (
-                <tr key={br.borrower_id} className="hover:bg-[#191D24]">
-                  <td className="py-2.5 px-4 font-mono text-xs text-[#94A3B8] tabular-nums whitespace-nowrap">
-                    #{br.borrower_id}
-                  </td>
-                  <td className="py-2.5 px-4 font-medium text-[#F4F6F8]">{br.borrower_name}</td>
-                  <td className="py-2.5 px-4 font-mono text-xs text-[#94A3B8] whitespace-nowrap">{br.roll_no}</td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs text-[#F4F6F8] tabular-nums whitespace-nowrap">
-                    {br.total_borrowed ?? 0}
-                  </td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs text-[#D2FF00] tabular-nums whitespace-nowrap">
-                    {br.active_loans ?? 0}
-                  </td>
-                  <td className="py-2.5 px-4 text-right font-mono text-xs tabular-nums whitespace-nowrap">
-                    <span className={br.overdue_loans ? 'text-[#FF3B5C] font-semibold' : 'text-[#475569]'}>
-                      {br.overdue_loans ?? 0}
                     </span>
                   </td>
                 </tr>

@@ -313,7 +313,7 @@ def compute_numpy_statistics(values: List[float]) -> Dict[str, float]:
 
 
 def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
-    """Generates a dark-themed Matplotlib SVG chart with Acid Volt (#D2FF00) telemetry styling directly from Python."""
+    """Generates a dark glassmorphic Matplotlib SVG chart with Warm Gold (#ffd085) & Sky (#38bdf8) telemetry styling directly from Python."""
     width, height = 740, 310
     pad_l, pad_r, pad_t, pad_b = 54, 28, 48, 48
     plot_w = width - pad_l - pad_r
@@ -331,20 +331,20 @@ def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
         f'<svg viewBox="0 0 {width} {height}" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Matplotlib Monthly Borrowing Trends Chart">',
         '<defs>',
         '  <linearGradient id="gradReturned" x1="0" y1="0" x2="0" y2="1">',
-        '    <stop offset="0%" stop-color="#D2FF00" stop-opacity="0.95"/>',
-        '    <stop offset="100%" stop-color="#99BD00" stop-opacity="0.55"/>',
+        '    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.95"/>',
+        '    <stop offset="100%" stop-color="#0284c7" stop-opacity="0.55"/>',
         '  </linearGradient>',
         '  <linearGradient id="gradOverdue" x1="0" y1="0" x2="0" y2="1">',
-        '    <stop offset="0%" stop-color="#FF3B5C" stop-opacity="0.95"/>',
-        '    <stop offset="100%" stop-color="#BE123C" stop-opacity="0.65"/>',
+        '    <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.95"/>',
+        '    <stop offset="100%" stop-color="#be123c" stop-opacity="0.65"/>',
         '  </linearGradient>',
         '  <linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1">',
-        '    <stop offset="0%" stop-color="#D2FF00" stop-opacity="0.20"/>',
-        '    <stop offset="100%" stop-color="#D2FF00" stop-opacity="0.0"/>',
+        '    <stop offset="0%" stop-color="#ffd085" stop-opacity="0.28"/>',
+        '    <stop offset="100%" stop-color="#ffd085" stop-opacity="0.0"/>',
         '  </linearGradient>',
         '</defs>',
-        f'<rect width="{width}" height="{height}" fill="#101318" rx="8"/>',
-        f'<text x="{pad_l}" y="24" fill="#F4F6F8" font-family="Archivo, Plus Jakarta Sans, sans-serif" font-size="12.5" font-weight="700">matplotlib.pyplot — Monthly Circulation Velocity</text>',
+        f'<rect width="{width}" height="{height}" fill="rgba(7,9,8,0.65)" rx="12"/>',
+        f'<text x="{pad_l}" y="24" fill="#fbf8ee" font-family="Playfair Display, Plus Jakarta Sans, serif" font-size="13" font-weight="700">matplotlib.pyplot — Monthly Circulation Velocity</text>',
     ]
 
     # Grid lines
@@ -352,10 +352,10 @@ def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
         val = round(y_max * i / 4)
         y = pad_t + plot_h - (val / y_max) * plot_h
         svg_lines.append(
-            f'<line x1="{pad_l}" y1="{y:.1f}" x2="{width - pad_r}" y2="{y:.1f}" stroke="#222731" stroke-dasharray="4,4" stroke-width="1"/>'
+            f'<line x1="{pad_l}" y1="{y:.1f}" x2="{width - pad_r}" y2="{y:.1f}" stroke="rgba(255,255,255,0.10)" stroke-dasharray="4,4" stroke-width="1"/>'
         )
         svg_lines.append(
-            f'<text x="{pad_l - 10}" y="{y + 4:.1f}" text-anchor="end" fill="#8A94A6" font-family="JetBrains Mono, monospace" font-size="11">{val}</text>'
+            f'<text x="{pad_l - 10}" y="{y + 4:.1f}" text-anchor="end" fill="#b5b8ad" font-family="JetBrains Mono, monospace" font-size="11">{val}</text>'
         )
 
     pts_total = []
@@ -394,7 +394,7 @@ def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
         )
         # X-axis label
         svg_lines.append(
-            f'<text x="{cx:.1f}" y="{height - 16}" text-anchor="middle" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500">{row["month"]}</text>'
+            f'<text x="{cx:.1f}" y="{height - 16}" text-anchor="middle" fill="#b5b8ad" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500">{row["month"]}</text>'
         )
 
     # Shaded area under total trend line + animated polyline
@@ -407,28 +407,28 @@ def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
         svg_lines.append(f'<polygon points="{area_pts}" fill="url(#gradArea)"/>')
         poly = " ".join(f"{x:.1f},{y:.1f}" for x, y, _ in pts_total)
         svg_lines.append(
-            f'<polyline fill="none" stroke="#F4F6F8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="{poly}" stroke-dasharray="900" stroke-dashoffset="0">'
+            f'<polyline fill="none" stroke="#ffd085" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="{poly}" stroke-dasharray="900" stroke-dashoffset="0">'
             f'<animate attributeName="stroke-dashoffset" from="900" to="0" dur="0.8s" fill="freeze"/>'
             f'</polyline>'
         )
 
     for x, y, val in pts_total:
         svg_lines.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" fill="#D2FF00" stroke="#101318" stroke-width="2"/>'
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" fill="#ffd085" stroke="#191c19" stroke-width="2"/>'
         )
         svg_lines.append(
-            f'<text x="{x:.1f}" y="{y - 9:.1f}" text-anchor="middle" fill="#F4F6F8" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">{val}</text>'
+            f'<text x="{x:.1f}" y="{y - 9:.1f}" text-anchor="middle" fill="#fbf8ee" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">{val}</text>'
         )
 
     # Legend positioned cleanly on right without overlapping title
     svg_lines.append(
         f'<g transform="translate({width - 255}, 12)">'
-        f'<rect x="0" y="3" width="10" height="10" fill="#F4F6F8" rx="2"/>'
-        f'<text x="14" y="12" fill="#94A3B8" font-family="Public Sans, sans-serif" font-size="11" font-weight="500">Total Issued</text>'
+        f'<rect x="0" y="3" width="10" height="10" fill="#ffd085" rx="2"/>'
+        f'<text x="14" y="12" fill="#b5b8ad" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="500">Total Issued</text>'
         f'<rect x="88" y="3" width="10" height="10" fill="url(#gradReturned)" rx="2"/>'
-        f'<text x="102" y="12" fill="#94A3B8" font-family="Public Sans, sans-serif" font-size="11" font-weight="500">Returned</text>'
+        f'<text x="102" y="12" fill="#b5b8ad" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="500">Returned</text>'
         f'<rect x="164" y="3" width="10" height="10" fill="url(#gradOverdue)" rx="2"/>'
-        f'<text x="178" y="12" fill="#94A3B8" font-family="Public Sans, sans-serif" font-size="11" font-weight="500">Overdue</text>'
+        f'<text x="178" y="12" fill="#b5b8ad" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="500">Overdue</text>'
         f'</g>'
     )
 
@@ -437,7 +437,7 @@ def generate_matplotlib_monthly_svg(monthly_rows: List[Dict[str, Any]]) -> str:
 
 
 def generate_matplotlib_popular_svg(popular_books: List[Dict[str, Any]]) -> str:
-    """Generates a dark-themed horizontal bar chart SVG with Acid Volt (#D2FF00) highlights for Most-Borrowed Books."""
+    """Generates a dark glassmorphic horizontal bar chart SVG with Warm Gold (#ffd085) & Emerald (#34d399) highlights for Most-Borrowed Books."""
     top_books = popular_books[:6]
     width, height = 740, 310
     pad_l, pad_r, pad_t, pad_b = 215, 78, 42, 30
@@ -454,16 +454,16 @@ def generate_matplotlib_popular_svg(popular_books: List[Dict[str, Any]]) -> str:
         f'<svg viewBox="0 0 {width} {height}" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Matplotlib Most-Borrowed Books Chart">',
         '<defs>',
         '  <linearGradient id="gradPopularBar" x1="0" y1="0" x2="1" y2="0">',
-        '    <stop offset="0%" stop-color="#334155"/>',
-        '    <stop offset="100%" stop-color="#64748B"/>',
+        '    <stop offset="0%" stop-color="#2a533e"/>',
+        '    <stop offset="100%" stop-color="#34d399"/>',
         '  </linearGradient>',
         '  <linearGradient id="gradTopRankBar" x1="0" y1="0" x2="1" y2="0">',
-        '    <stop offset="0%" stop-color="#99BD00"/>',
-        '    <stop offset="100%" stop-color="#D2FF00"/>',
+        '    <stop offset="0%" stop-color="#c49a55"/>',
+        '    <stop offset="100%" stop-color="#ffd085"/>',
         '  </linearGradient>',
         '</defs>',
-        f'<rect width="{width}" height="{height}" fill="#101318" rx="8"/>',
-        f'<text x="16" y="24" fill="#F4F6F8" font-family="Archivo, Plus Jakarta Sans, sans-serif" font-size="12.5" font-weight="700">matplotlib.pyplot — Top Borrowed Books Ranking (Total Issues)</text>',
+        f'<rect width="{width}" height="{height}" fill="rgba(7,9,8,0.65)" rx="12"/>',
+        f'<text x="16" y="24" fill="#fbf8ee" font-family="Playfair Display, Plus Jakarta Sans, serif" font-size="13" font-weight="700">matplotlib.pyplot — Top Borrowed Books Ranking (Total Issues)</text>',
     ]
 
     for idx, book in enumerate(top_books):
@@ -472,14 +472,14 @@ def generate_matplotlib_popular_svg(popular_books: List[Dict[str, Any]]) -> str:
         w = max(6.0, (book["total_loans"] / max_loans) * plot_w)
         short_title = book["title"] if len(book["title"]) <= 28 else book["title"][:25] + "..."
         fill_ref = "url(#gradTopRankBar)" if idx == 0 else "url(#gradPopularBar)"
-        label_color = "#D2FF00" if idx == 0 else "#F4F6F8"
+        label_color = "#ffd085" if idx == 0 else "#34d399"
 
-        # Subtle dark carbon background track
+        # Subtle dark glass background track
         svg_lines.append(
-            f'<rect x="{pad_l}" y="{cy - bar_h / 2:.1f}" width="{plot_w:.1f}" height="{bar_h:.1f}" fill="#1A1E26" rx="4"/>'
+            f'<rect x="{pad_l}" y="{cy - bar_h / 2:.1f}" width="{plot_w:.1f}" height="{bar_h:.1f}" fill="rgba(255,255,255,0.06)" rx="4"/>'
         )
         svg_lines.append(
-            f'<text x="{pad_l - 12}" y="{cy + 4:.1f}" text-anchor="end" fill="#E2E8F0" font-family="Public Sans, sans-serif" font-size="11.5" font-weight="600">{short_title}</text>'
+            f'<text x="{pad_l - 12}" y="{cy + 4:.1f}" text-anchor="end" fill="#fbf8ee" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="600">{short_title}</text>'
         )
         svg_lines.append(
             f'<rect x="{pad_l}" y="{cy - bar_h / 2:.1f}" width="{w:.1f}" height="{bar_h:.1f}" fill="{fill_ref}" rx="4">'

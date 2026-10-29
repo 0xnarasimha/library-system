@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Download, Copy, Check, Database, RotateCcw } from 'lucide-react';
+import type { AppRoutePath } from '../App';
+
+export type PythonSubRoute = 'cli' | 'sql' | 'source' | 'presentation';
 
 interface PythonFileItem {
   filename: string;
@@ -9,6 +11,8 @@ interface PythonFileItem {
 }
 
 interface PythonStudioProps {
+  subRoute: PythonSubRoute;
+  onNavigateRoute: (path: AppRoutePath) => void;
   onRunCliReport: () => Promise<{ ok: boolean; report_text?: string; error?: string }>;
   onRunSql: (sql: string) => Promise<{
     ok: boolean;
@@ -66,6 +70,7 @@ ORDER BY issue_month ASC;`,
 ];
 
 export const PythonStudio: React.FC<PythonStudioProps> = ({
+  subRoute,
   onRunCliReport,
   onRunSql,
   onResetDatabase,
@@ -140,68 +145,63 @@ export const PythonStudio: React.FC<PythonStudioProps> = ({
 
   const activeFile = files[activeFileIdx];
 
-  return (
-    <div className="space-y-8">
-      {/* Live Python 3 CLI Output Runner */}
+  if (subRoute === 'presentation') {
+    return (
       <section
-        aria-label="Live Python 3 Execution Console"
-        className="bg-[#13161B] border border-[#242933] rounded-xl overflow-hidden"
+        aria-label="Project Presentation Slide Deck"
+        className="apple-glass-table p-6 sm:p-8 space-y-5"
       >
-        <div className="px-5 py-4 border-b border-[#222731] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/10">
           <div>
-            <div className="text-xs font-mono text-[#D2FF00]">
-              $ python3 python/library_engine.py
+            <div className="text-xs font-mono text-[#ffd085]">
+              ROUTE // /python/presentation · Interactive 9-Slide Presentation Deck
             </div>
-            <h2 className="text-base font-bold text-[#F4F6F8]">
-              Live Python 3 Statistical &amp; Circulation Report Runner
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onResetDatabase}
-              disabled={isBusy}
-              className="px-3 py-1.5 text-xs font-medium text-[#F4F6F8] bg-[#1C2129] hover:bg-[#262C36] border border-[#2D3440] rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Seed Database
-            </button>
-            <button
-              type="button"
-              onClick={handleExecuteCli}
-              disabled={cliLoading || isBusy}
-              className="px-3.5 py-1.5 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <Play className="w-3.5 h-3.5" />
-              {cliLoading ? 'Running Python...' : 'Run Python Analysis'}
-            </button>
-          </div>
-        </div>
-
-        <pre
-          data-testid="python-cli-output"
-          className="p-5 bg-[#0B0C0E] text-[#E2E8F0] font-mono text-xs leading-relaxed overflow-x-auto max-h-96"
-        >
-          {cliOutput || 'Executing Python 3 script...'}
-        </pre>
-      </section>
-
-      {/* Interactive Relational SQL Query Console */}
-      <section
-        aria-label="Relational SQL Query Console"
-        className="bg-[#13161B] border border-[#242933] rounded-xl overflow-hidden"
-      >
-        <div className="px-5 py-4 border-b border-[#222731] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 className="text-base font-bold text-[#F4F6F8]">
-              Interactive SQL Query Workbench (books, borrowers, loans)
-            </h2>
-            <p className="text-xs text-[#8A94A6]">
-              Execute live SQL queries via Python sqlite3 / MySQL schema
+            <h1 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
+              PyLibAnalytics — Project Presentation Deck
+            </h1>
+            <p className="text-xs text-[#b5b8ad]">
+              Use arrow keys or bottom slide controls to navigate the 9 project slides
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <a
+            href="/assets/aistudio/presentation_90e1e161.html"
+            download="PyLibAnalytics_Presentation.html"
+            className="px-4 py-2 rounded-xl bg-[#ffd085] hover:bg-[#ffe0a3] text-[#191c19] font-mono text-xs font-bold transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            Download Presentation HTML
+          </a>
+        </div>
+        <div className="w-full h-[640px] rounded-2xl overflow-hidden border border-white/15 bg-black/60">
+          <iframe
+            src="/assets/aistudio/presentation_90e1e161.html"
+            title="PyLibAnalytics Project Presentation"
+            className="w-full h-full border-0"
+          />
+        </div>
+      </section>
+    );
+  }
+
+  if (subRoute === 'sql') {
+    return (
+      <section
+        aria-label="Relational SQL Query Console"
+        className="apple-glass-table p-6 sm:p-8 space-y-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <div className="text-xs font-mono text-[#ffd085]">
+              ROUTE // /python/sql · sqlite3 &amp; MySQL Compatible
+            </div>
+            <h1 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
+              Interactive SQL Query Workbench (books, borrowers, loans)
+            </h1>
+            <p className="text-xs text-[#b5b8ad]">
+              Execute live relational SQL queries via Python sqlite3 / MySQL schema
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             {PRESET_QUERIES.map((preset) => (
               <button
                 key={preset.label}
@@ -210,7 +210,7 @@ export const PythonStudio: React.FC<PythonStudioProps> = ({
                   setSqlInput(preset.sql);
                   handleExecuteSql(preset.sql);
                 }}
-                className="px-2.5 py-1 text-xs font-medium text-[#F4F6F8] bg-[#1C2129] hover:bg-[#262C36] border border-[#2D3440] rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-[#ffd085] hover:text-[#191c19] border border-white/15 text-xs font-mono text-[#fbf8ee] transition-colors cursor-pointer"
               >
                 {preset.label}
               </button>
@@ -218,46 +218,46 @@ export const PythonStudio: React.FC<PythonStudioProps> = ({
           </div>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <textarea
               aria-label="SQL Query Editor"
-              rows={4}
+              rows={5}
               value={sqlInput}
               onChange={(e) => setSqlInput(e.target.value)}
-              className="flex-1 p-3 font-mono text-xs bg-[#0B0C0E] text-[#F4F6F8] border border-[#2D3440] rounded-md focus:outline-none focus:ring-2 focus:ring-[#D2FF00]"
+              className="flex-1 p-4 font-mono text-xs bg-black/55 text-[#fbf8ee] border border-white/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffd085]/60"
             />
             <button
               type="button"
               onClick={() => handleExecuteSql()}
-              className="px-4 py-2 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded-md transition-colors self-start flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-5 py-3 rounded-xl bg-[#ffd085] hover:bg-[#ffe0a3] text-[#191c19] font-mono text-xs font-bold transition-colors self-start flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Database className="w-3.5 h-3.5" />
+              <span className="material-symbols-outlined text-[16px]">database</span>
               Execute SQL
             </button>
           </div>
 
           {sqlResult?.error ? (
-            <div className="p-3 bg-[#2A1218] border border-[#FF3B5C]/40 rounded-md text-xs text-[#FF6B84] font-mono">
+            <div className="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 font-mono">
               {sqlResult.error}
             </div>
           ) : sqlResult && sqlResult.columns.length > 0 ? (
-            <div className="overflow-x-auto border border-[#222731] rounded-md">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto rounded-xl border border-white/15 bg-black/40">
+              <table className="w-full text-left font-mono text-xs">
                 <thead>
-                  <tr className="border-b border-[#222731] bg-[#0E1116] text-xs font-mono font-semibold text-[#D2FF00]">
+                  <tr className="border-b border-white/10 bg-white/05 text-[#ffd085] font-semibold">
                     {sqlResult.columns.map((col) => (
-                      <th key={col} className="py-2 px-3 whitespace-nowrap">
+                      <th key={col} className="py-3 px-4 whitespace-nowrap">
                         {col}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#222731] text-xs font-mono tabular-nums">
+                <tbody className="divide-y divide-white/05">
                   {sqlResult.rows.map((row, rIdx) => (
-                    <tr key={rIdx} className="hover:bg-[#191D24]">
+                    <tr key={rIdx} className="hover:bg-white/05">
                       {sqlResult.columns.map((col) => (
-                        <td key={col} className="py-2 px-3 text-[#F4F6F8]">
+                        <td key={col} className="py-2.5 px-4 text-[#fbf8ee]">
                           {row[col] === null ? 'NULL' : String(row[col])}
                         </td>
                       ))}
@@ -269,32 +269,38 @@ export const PythonStudio: React.FC<PythonStudioProps> = ({
           ) : null}
         </div>
       </section>
+    );
+  }
 
-      {/* Complete Python Submission Source Code Pack */}
+  if (subRoute === 'source') {
+    return (
       <section
         aria-label="Python Project Submission Files"
-        className="bg-[#13161B] border border-[#242933] rounded-xl overflow-hidden"
+        className="apple-glass-table p-6 sm:p-8 space-y-5"
       >
-        <div className="px-5 py-4 border-b border-[#222731] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-white/10">
           <div>
-            <h2 className="text-base font-bold text-[#F4F6F8]">
+            <div className="text-xs font-mono text-[#ffd085]">
+              ROUTE // /python/source · Python 3 Project Submission Bundle
+            </div>
+            <h1 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
               Python Project Submission Source Files
-            </h2>
-            <p className="text-xs text-[#8A94A6]">
+            </h1>
+            <p className="text-xs text-[#b5b8ad]">
               Ready-to-submit Python 3 scripts (Pandas, NumPy, Matplotlib, SQLite/MySQL)
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             {files.map((file, idx) => (
               <button
                 key={file.filename}
                 type="button"
                 onClick={() => setActiveFileIdx(idx)}
-                className={`px-3 py-1.5 text-xs font-mono rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`px-3.5 py-1.5 text-xs font-mono rounded-xl transition-colors cursor-pointer ${
                   activeFileIdx === idx
-                    ? 'bg-[#D2FF00] text-[#0B0C0E] font-bold'
-                    : 'bg-[#1C2129] text-[#94A3B8] hover:text-[#F4F6F8]'
+                    ? 'bg-[#ffd085] text-[#191c19] font-bold'
+                    : 'bg-white/10 text-[#d8dad0] hover:text-[#fbf8ee]'
                 }`}
               >
                 {file.filename}
@@ -304,43 +310,81 @@ export const PythonStudio: React.FC<PythonStudioProps> = ({
         </div>
 
         {activeFile && (
-          <div>
-            <div className="px-5 py-2.5 bg-[#0E1116] border-b border-[#222731] flex items-center justify-between gap-4">
-              <span className="text-xs font-medium text-[#94A3B8]">{activeFile.title}</span>
+          <div className="rounded-2xl overflow-hidden border border-white/15 bg-black/55">
+            <div className="px-5 py-3 bg-white/05 border-b border-white/10 flex items-center justify-between gap-4">
+              <span className="text-xs font-mono text-[#d8dad0]">{activeFile.title}</span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => copyFileContent(activeFile)}
-                  className="px-2.5 py-1 text-xs font-medium text-[#F4F6F8] bg-[#1C2129] border border-[#2D3440] hover:bg-[#262C36] rounded flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-[#fbf8ee] transition-colors cursor-pointer"
                 >
-                  {copiedFile === activeFile.filename ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-[#D2FF00]" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      Copy Code
-                    </>
-                  )}
+                  {copiedFile === activeFile.filename ? 'Copied!' : 'Copy Code'}
                 </button>
                 <button
                   type="button"
                   onClick={() => downloadFile(activeFile)}
-                  className="px-2.5 py-1 text-xs font-bold text-[#0B0C0E] bg-[#D2FF00] hover:bg-[#b8e600] rounded flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-[#ffd085] text-[#191c19] text-xs font-mono font-bold cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5" />
                   Download {activeFile.filename}
                 </button>
               </div>
             </div>
-            <pre className="p-5 bg-[#0B0C0E] text-[#E2E8F0] font-mono text-xs leading-relaxed overflow-x-auto max-h-[520px]">
+            <pre className="p-5 text-[#fbf8ee] font-mono text-xs leading-relaxed overflow-x-auto max-h-[560px]">
               {activeFile.content}
             </pre>
           </div>
         )}
       </section>
-    </div>
+    );
+  }
+
+  // Default SubRoute: 'cli' ('/python')
+  return (
+    <section
+      aria-label="Live Python 3 Execution Console"
+      className="apple-glass-table p-6 sm:p-8 space-y-5"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/10">
+        <div>
+          <div className="text-xs font-mono text-[#ffd085]">
+            ROUTE // /python · $ python3 python/library_engine.py
+          </div>
+          <h1 className="mt-1 font-serif text-2xl font-bold text-[#fbf8ee]">
+            Live Python 3 Statistical &amp; Circulation Report Runner
+          </h1>
+          <p className="text-xs text-[#b5b8ad]">
+            Executes the Python 3 backend script directly and streams formatted standard output
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onResetDatabase}
+            disabled={isBusy}
+            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-mono text-[#fbf8ee] transition-colors cursor-pointer"
+          >
+            Reset Seed Database
+          </button>
+          <button
+            type="button"
+            onClick={handleExecuteCli}
+            disabled={cliLoading || isBusy}
+            className="px-4 py-2 rounded-xl bg-[#ffd085] hover:bg-[#ffe0a3] text-[#191c19] font-mono text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+            {cliLoading ? 'Running Python...' : 'Run Python Analysis'}
+          </button>
+        </div>
+      </div>
+
+      <pre
+        data-testid="python-cli-output"
+        className="p-6 rounded-2xl bg-black/60 border border-white/10 text-[#fbf8ee] font-mono text-xs leading-relaxed overflow-x-auto max-h-[540px]"
+      >
+        {cliOutput || 'Executing Python 3 script...'}
+      </pre>
+    </section>
   );
 };
