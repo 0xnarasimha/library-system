@@ -11,29 +11,38 @@ const __dirname = path.dirname(__filename);
 const PYTHON_ENGINE_PATH = path.join(__dirname, 'python', 'library_engine.py');
 
 function invokePythonEngine(action: string, payload: Record<string, unknown> = {}): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const child = execFile(
-      'python3',
-      [PYTHON_ENGINE_PATH, action],
-      { maxBuffer: 10 * 1024 * 1024, timeout: 15000 },
-      (error, stdout, stderr) => {
-        if (error) {
-          return reject(new Error(stderr || error.message));
-        }
-        try {
-          const parsed = JSON.parse(stdout);
-          resolve(parsed);
-        } catch (parseErr) {
-          reject(new Error(`Failed to parse Python output: ${stdout.slice(0, 300)}`));
-        }
-      }
-    );
+  const primaryBin = process.env.PYTHON_BIN || (process.platform === 'win32' ? 'python' : 'python3');
+  const fallbackBin = primaryBin === 'python3' ? 'python' : 'python3';
 
-    if (child.stdin) {
-      child.stdin.write(JSON.stringify(payload));
-      child.stdin.end();
-    }
-  });
+  const runWithBinary = (bin: string, allowFallback: boolean): Promise<any> =>
+    new Promise((resolve, reject) => {
+      const child = execFile(
+        bin,
+        [PYTHON_ENGINE_PATH, action],
+        { maxBuffer: 10 * 1024 * 1024, timeout: 15000 },
+        (error, stdout, stderr) => {
+          if (error) {
+            if (allowFallback && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+              return resolve(runWithBinary(fallbackBin, false));
+            }
+            return reject(new Error(stderr || error.message));
+          }
+          try {
+            const parsed = JSON.parse(stdout);
+            resolve(parsed);
+          } catch (parseErr) {
+            reject(new Error(`Failed to parse Python output: ${stdout.slice(0, 300)}`));
+          }
+        }
+      );
+
+      if (child.stdin) {
+        child.stdin.write(JSON.stringify(payload));
+        child.stdin.end();
+      }
+    });
+
+  return runWithBinary(primaryBin, true);
 }
 
 async function startServer() {
